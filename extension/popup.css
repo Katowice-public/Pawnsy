@@ -1,0 +1,56 @@
+body {
+  margin: 0;
+  width: 300px;
+  font-family: "Segoe UI", "Avenir Next", system-ui, sans-serif;
+  background: #1c1712;
+  color: #f3ead7;
+}
+
+header {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  padding: 14px 14px 8px;
+}
+
+header img {
+  border-radius: 10px;
+}
+
+header strong {
+  font-family: Palatino, Georgia, serif;
+  font-size: 1.2rem;
+}
+
+header p {
+  margin: 2px 0 0;
+  color: #d9ccb3;
+  font-size: 0.8rem;
+}
+
+.row,
+.open {
+  display: block;
+  margin: 8px 12px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: #2f261d;
+  color: #f3ead7;
+  text-decoration: none;
+}
+
+.row em {
+  display: block;
+  color: #d4a84b;
+  font-style: normal;
+  font-size: 0.85rem;
+  margin-top: 2px;
+}
+
+.open {
+  background: #d4a84b;
+  color: #1c1712;
+  text-align: center;
+  font-weight: 700;
+  margin-bottom: 14px;
+}
