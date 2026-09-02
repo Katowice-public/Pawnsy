@@ -8,6 +8,7 @@ import { think } from "./engine-client.js";
 import { speakCoach } from "../lib/voice.js";
 import { addXp, adaptPlayStrength, awardBadge, logPrivacy, touchStreak } from "../ui/storage.js";
 import { voiceOptions, withPersona } from "../lib/i18n.js";
+import { previewLine } from "../lib/voice-style.js";
 import { kingSafetySentence } from "../lib/king-safety.js";
 import { labelMoveQuality, swingForMover } from "../lib/human-eval.js";
 import { addJournalEntry, hangingNote } from "../lib/journal.js";
@@ -62,6 +63,24 @@ export function renderPlay(root, ctx) {
               ${STRENGTHS.map((s) => `<option value="${s.id}">${s.label}</option>`).join("")}
             </select>
           </label>
+          <label class="field">
+            <span>Pawnsy's voice</span>
+            <select id="play-gender">
+              <option value="female">Woman</option>
+              <option value="male">Man</option>
+            </select>
+          </label>
+          <label class="field">
+            <span>Tone</span>
+            <select id="play-tone">
+              <option value="warm">Warm</option>
+              <option value="calm">Calm</option>
+              <option value="bright">Bright</option>
+              <option value="hype">Hype</option>
+              <option value="coach">Firm coach</option>
+            </select>
+          </label>
+          <button type="button" class="btn ghost" id="play-preview-voice">Preview voice</button>
           <p class="muted" id="strength-blurb"></p>
         </div>
         <div class="panel coach-panel">
@@ -78,10 +97,14 @@ export function renderPlay(root, ctx) {
   const evalFill = root.querySelector("#eval-fill");
   const colorSel = root.querySelector("#play-color");
   const strengthSel = root.querySelector("#play-strength");
+  const genderSel = root.querySelector("#play-gender");
+  const toneSel = root.querySelector("#play-tone");
   const blurb = root.querySelector("#strength-blurb");
 
   colorSel.value = userColor;
   strengthSel.value = strength;
+  genderSel.value = settings.voiceGender === "male" ? "male" : "female";
+  toneSel.value = settings.persona || "warm";
   blurb.textContent = STRENGTHS.find((s) => s.id === strength).blurb;
 
   board = new Board(boardRoot, {
@@ -302,6 +325,20 @@ export function renderPlay(root, ctx) {
     ctx.progress.settings.strength = strength;
     blurb.textContent = STRENGTHS.find((s) => s.id === strength).blurb;
     ctx.save();
+  });
+  genderSel.addEventListener("change", () => {
+    ctx.progress.settings.voiceGender = genderSel.value;
+    ctx.save();
+  });
+  toneSel.addEventListener("change", () => {
+    ctx.progress.settings.persona = toneSel.value;
+    ctx.save();
+  });
+  root.querySelector("#play-preview-voice").addEventListener("click", () => {
+    ctx.progress.settings.voiceGender = genderSel.value;
+    ctx.progress.settings.persona = toneSel.value;
+    ctx.save();
+    say(previewLine(ctx.progress.settings), "", true);
   });
 
   newGame();

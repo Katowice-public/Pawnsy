@@ -59,7 +59,8 @@ Optional dashboard (not a forced new tab): [http://localhost:5173/app/newtab.htm
 - Rules of chess via [chess.js](https://github.com/jhlywa/chess.js) (BSD-2-Clause), vendored in `extension/vendor/`.
 - A small alpha-beta engine with an opening book — enough to teach, not a cheating tool.
 - Voice locales: English, Spanish, French, German (overlay chrome + TTS language; move essays stay in English).
-- Calm vs hype persona, large captions even when voice is muted.
+- Woman or man voice, plus warm / calm / bright / hype / firm-coach tones. Pawnsy picks the most natural system voice it can find and speaks in short sentences instead of one robotic paragraph.
+- Large captions even when voice is muted.
 
 ## Tests
 

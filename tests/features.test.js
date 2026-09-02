@@ -15,6 +15,13 @@ import { lessonById } from "../extension/data/lessons.js";
 import { puzzleById } from "../extension/data/puzzles.js";
 import { OPENINGS } from "../extension/data/openings.js";
 import { t } from "../extension/lib/i18n.js";
+import {
+  humanizeForSpeech,
+  pickBestVoice,
+  scoreVoice,
+  splitSentences,
+  styleFromSettings,
+} from "../extension/lib/voice-style.js";
 
 test("human labels never show numeric eval", () => {
   const labels = [-900, -400, -200, -80, 0, 90, 200, 500].map(labelMoveQuality);
@@ -127,6 +134,28 @@ test("endgame and trap lessons are in the academy pack", () => {
   for (const id of ["opposition", "lucena", "philidor", "legal-trap", "fishing-pole", "elephant-trap"]) {
     assert.ok(ids.includes(id), id);
   }
+});
+
+test("voice picker prefers a natural woman over a robot", () => {
+  const voices = [
+    { name: "Zarvox", lang: "en-US" },
+    { name: "Google US English", lang: "en-US" },
+    { name: "Microsoft David", lang: "en-US", gender: "male" },
+    { name: "Samantha", lang: "en-US" },
+  ];
+  const woman = pickBestVoice(voices, { lang: "en-US", gender: "female" });
+  assert.equal(woman.name, "Samantha");
+  const man = pickBestVoice(voices, { lang: "en-US", gender: "male" });
+  assert.equal(man.name, "Microsoft David");
+  assert.ok(scoreVoice({ name: "Zarvox", lang: "en-US" }, { gender: "female" }) < 0);
+  const femaleWarm = styleFromSettings({ voiceGender: "female", persona: "warm" });
+  const maleCoach = styleFromSettings({ voiceGender: "male", persona: "coach" });
+  assert.ok(femaleWarm.pitch > maleCoach.pitch);
+  assert.equal(femaleWarm.gender, "female");
+  assert.equal(maleCoach.gender, "male");
+  assert.match(humanizeForSpeech("Center — then the king."), /,/);
+  const bits = splitSentences("Center first. Then look at the king.");
+  assert.equal(bits.length, 2);
 });
 
 test("anki export is tab-separated and has no raw eval", () => {

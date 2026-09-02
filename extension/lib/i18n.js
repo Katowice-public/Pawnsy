@@ -1,3 +1,5 @@
+import { styleFromSettings } from "./voice-style.js";
+
 export const VOICE_LANG = {
   en: "en-US",
   es: "es-ES",
@@ -83,21 +85,20 @@ export function t(settings, key) {
 }
 
 export function voiceOptions(settings) {
-  const loc = localeOf(settings);
-  const persona = settings?.persona || "calm";
-  return {
-    lang: VOICE_LANG[loc] || "en-US",
-    rate: persona === "hype" ? 1.14 : 0.96,
-  };
+  return styleFromSettings(settings);
 }
 
 export function withPersona(text, settings, { ownMove } = {}) {
   if (!text) return text;
-  const persona = settings?.persona || "calm";
+  const persona = settings?.persona || "warm";
   if (persona === "hype" && ownMove) {
     const pep = ["Nice find.", "Yes!", "That has bite.", "Keep going."];
     return `${text} ${pep[text.length % pep.length]}`;
   }
-  if (persona === "calm") return text.replace(/!\s*$/, ".");
+  if (persona === "bright" && ownMove) {
+    return `${text} That is the idea.`;
+  }
+  if (persona === "coach") return text;
+  if (persona === "calm" || persona === "warm") return text.replace(/!\s*$/, ".");
   return text;
 }

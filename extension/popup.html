@@ -28,6 +28,26 @@
       <input type="checkbox" id="voice" checked />
       <span>Voice coach</span>
     </label>
+    <div class="voice-box">
+      <label class="field">
+        <span>Voice</span>
+        <select id="voiceGender">
+          <option value="female">Woman</option>
+          <option value="male">Man</option>
+        </select>
+      </label>
+      <label class="field">
+        <span>Tone</span>
+        <select id="persona">
+          <option value="warm">Warm</option>
+          <option value="calm">Calm</option>
+          <option value="bright">Bright</option>
+          <option value="hype">Hype</option>
+          <option value="coach">Firm coach</option>
+        </select>
+      </label>
+      <button type="button" class="open secondary" id="preview-voice">Preview voice</button>
+    </div>
     <label class="toggle">
       <input type="checkbox" id="siteCoach" checked />
       <span>Talk on Chess.com &amp; Lichess</span>
@@ -42,13 +62,6 @@
           <option value="es">Español</option>
           <option value="fr">Français</option>
           <option value="de">Deutsch</option>
-        </select>
-      </label>
-      <label class="field">
-        <span>Persona</span>
-        <select id="persona">
-          <option value="calm">Calm</option>
-          <option value="hype">Hype</option>
         </select>
       </label>
       <label class="toggle">

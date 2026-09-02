@@ -1,3 +1,11 @@
+import {
+  clampPitch,
+  clampRate,
+  humanizeForSpeech,
+  pickBestVoice,
+  splitSentences,
+} from "./voice-style.js";
+
 const PIECE_WORDS = { N: "knight", B: "bishop", R: "rook", Q: "queen", K: "king" };
 
 export function speakableSan(san) {
@@ -18,28 +26,35 @@ export function speakableSan(san) {
 
 export function forVoice(text) {
   if (!text) return "";
-  return text
-    .replace(/\bO-O-O\b/g, "castles long")
-    .replace(/\bO-O\b/g, "castles short")
-    .replace(/\b([NBRQK][a-h1-8x=QRBN]*[a-h][1-8](?:=[QRBN])?[+#]?)\b/g, (san) => speakableSan(san))
-    .replace(/\s+/g, " ")
-    .trim();
+  return humanizeForSpeech(
+    text
+      .replace(/\bO-O-O\b/g, "castles long")
+      .replace(/\bO-O\b/g, "castles short")
+      .replace(/\b([NBRQK][a-h1-8x=QRBN]*[a-h][1-8](?:=[QRBN])?[+#]?)\b/g, (san) => speakableSan(san)),
+  ).slice(0, 480);
 }
 
 export function speakCoach(text, options = {}) {
-  const spoken = forVoice(text).slice(0, 420);
+  const spoken = forVoice(text);
   if (!spoken) return;
-  const lang = options.lang || "en-US";
-  const rate = options.rate || 1.05;
+  const payload = {
+    type: "pawnsy-speak",
+    text: spoken,
+    lang: options.lang || "en-US",
+    rate: clampRate(options.rate || 0.9),
+    pitch: clampPitch(options.pitch ?? 1.05),
+    volume: options.volume ?? 0.96,
+    gender: options.gender || "female",
+  };
   if (globalThis.chrome?.runtime?.sendMessage) {
     try {
-      chrome.runtime.sendMessage({ type: "pawnsy-speak", text: spoken, lang, rate });
+      chrome.runtime.sendMessage(payload);
       return;
     } catch {
       /* fall through to page speech */
     }
   }
-  speakLocal(spoken, { lang, rate });
+  speakLocal(spoken, payload);
 }
 
 export function stopSpeaking() {
@@ -53,21 +68,43 @@ export function stopSpeaking() {
   if (globalThis.speechSynthesis) speechSynthesis.cancel();
 }
 
-export function speakLocal(text, options = {}) {
+function loadWebVoices() {
+  const now = speechSynthesis.getVoices();
+  if (now.length) return Promise.resolve(now);
+  return new Promise((resolve) => {
+    const done = () => resolve(speechSynthesis.getVoices());
+    speechSynthesis.addEventListener("voiceschanged", done, { once: true });
+    window.setTimeout(done, 500);
+  });
+}
+
+function makeUtterance(chunk, options, voice) {
+  const utter = new SpeechSynthesisUtterance(chunk);
+  utter.lang = options.lang || "en-US";
+  utter.rate = clampRate(options.rate || 0.9);
+  utter.pitch = clampPitch(options.pitch ?? 1.05);
+  utter.volume = Math.min(1, Math.max(0, Number(options.volume ?? 0.96)));
+  if (voice) utter.voice = voice;
+  return utter;
+}
+
+export async function speakLocal(text, options = {}) {
   if (!globalThis.speechSynthesis) return;
   speechSynthesis.cancel();
-  const utter = new SpeechSynthesisUtterance(text);
-  const lang = options.lang || "en-US";
-  utter.lang = lang;
-  utter.rate = options.rate || 1.02;
-  utter.pitch = 1.04;
-  const prefix = lang.slice(0, 2);
-  const voices = speechSynthesis.getVoices();
-  const pick =
-    voices.find((v) => v.lang?.toLowerCase().startsWith(lang.toLowerCase())) ||
-    voices.find((v) => v.lang?.toLowerCase().startsWith(prefix)) ||
-    voices.find((v) => /en[-_]?US/i.test(v.lang) && /natural|google|samantha|female/i.test(v.name)) ||
-    voices.find((v) => /^en/i.test(v.lang));
-  if (pick) utter.voice = pick;
-  speechSynthesis.speak(utter);
+  await new Promise((resolve) => window.setTimeout(resolve, 40));
+  const voices = await loadWebVoices();
+  const pick = pickBestVoice(voices, { lang: options.lang || "en-US", gender: options.gender || "female" });
+  const chosen = pick ? voices.find((v) => (v.voiceName || v.name) === pick.name) : null;
+  const chunks = splitSentences(text);
+  let index = 0;
+  const next = () => {
+    if (index >= chunks.length) return;
+    const utter = makeUtterance(chunks[index], options, chosen);
+    const drift = index % 3 === 1 ? 0.04 : index % 3 === 2 ? -0.03 : 0;
+    utter.pitch = clampPitch((options.pitch ?? 1.05) + drift);
+    index += 1;
+    utter.onend = () => window.setTimeout(next, 90);
+    speechSynthesis.speak(utter);
+  };
+  next();
 }

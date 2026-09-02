@@ -435,6 +435,10 @@ h1 {
   margin-bottom: 12px;
 }
 
+.panel .btn {
+  margin-top: 8px;
+}
+
 .field {
   display: flex;
   flex-direction: column;

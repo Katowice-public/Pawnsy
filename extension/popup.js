@@ -2,6 +2,9 @@ import { loadProgress, rankFor, saveProgress } from "./ui/storage.js";
 import { LESSONS } from "./data/lessons.js";
 import { dailyPuzzle } from "./data/puzzles.js";
 import { dailyThreePlan } from "./lib/daily.js";
+import { speakCoach } from "./lib/voice.js";
+import { voiceOptions } from "./lib/i18n.js";
+import { previewLine } from "./lib/voice-style.js";
 
 function openPage(hash) {
   const url = chrome.runtime.getURL(`app/index.html${hash}`);
@@ -58,7 +61,8 @@ for (const id of ids) {
   }
 }
 document.getElementById("voiceLocale").value = settings.voiceLocale || "en";
-document.getElementById("persona").value = settings.persona || "calm";
+document.getElementById("voiceGender").value = settings.voiceGender === "male" ? "male" : "female";
+document.getElementById("persona").value = settings.persona || "warm";
 const hint = document.getElementById("newtab-hint");
 hint.hidden = !document.getElementById("useNewTab").checked;
 
@@ -74,15 +78,21 @@ async function persist() {
     clockSilence: document.getElementById("clockSilence").checked,
     useNewTab: document.getElementById("useNewTab").checked,
     voiceLocale: document.getElementById("voiceLocale").value,
+    voiceGender: document.getElementById("voiceGender").value,
     persona: document.getElementById("persona").value,
   };
   hint.hidden = !progress.settings.useNewTab;
   await saveProgress(progress);
 }
 
-for (const id of [...ids, "voiceLocale", "persona"]) {
+for (const id of [...ids, "voiceLocale", "voiceGender", "persona"]) {
   document.getElementById(id).addEventListener("change", persist);
 }
+
+document.getElementById("preview-voice").addEventListener("click", async () => {
+  await persist();
+  speakCoach(previewLine(progress.settings), voiceOptions(progress.settings));
+});
 
 document.getElementById("review-pgn").addEventListener("click", async () => {
   const pgn = document.getElementById("pgn").value.trim();
