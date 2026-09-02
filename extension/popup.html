@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Pawnsy</title>
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <header>
+      <img src="icons/icon-48.png" alt="" width="40" height="40" />
+      <div>
+        <strong>Pawnsy</strong>
+        <p id="rankline">Loading…</p>
+      </div>
+    </header>
+    <a class="row" id="today" href="#">
+      <span>Today's three</span>
+      <em id="today-name">…</em>
+    </a>
+    <a class="row" id="daily" href="#">
+      <span>Daily puzzle</span>
+      <em id="daily-name">…</em>
+    </a>
+    <a class="row" id="academy" href="#">Continue Academy</a>
+    <a class="row" id="play" href="#">Play vs Pawnsy</a>
+    <label class="toggle">
+      <input type="checkbox" id="voice" checked />
+      <span>Voice coach</span>
+    </label>
+    <div class="voice-box">
+      <label class="field">
+        <span>Voice</span>
+        <select id="voiceGender">
+          <option value="female">Woman</option>
+          <option value="male">Man</option>
+        </select>
+      </label>
+      <label class="field">
+        <span>Tone</span>
+        <select id="persona">
+          <option value="warm">Warm</option>
+          <option value="calm">Calm</option>
+          <option value="bright">Bright</option>
+          <option value="hype">Hype</option>
+          <option value="coach">Firm coach</option>
+        </select>
+      </label>
+      <button type="button" class="open secondary" id="preview-voice">Preview voice</button>
+    </div>
+    <label class="toggle">
+      <input type="checkbox" id="siteCoach" checked />
+      <span>Talk on Chess.com &amp; Lichess</span>
+    </label>
+    <p class="fine">Explains the move that just happened. No live engine lines on rated games.</p>
+    <details class="more" id="more">
+      <summary>More options</summary>
+      <label class="field">
+        <span>Voice language</span>
+        <select id="voiceLocale">
+          <option value="en">English</option>
+          <option value="es">Español</option>
+          <option value="fr">Français</option>
+          <option value="de">Deutsch</option>
+        </select>
+      </label>
+      <label class="toggle">
+        <input type="checkbox" id="captions" checked />
+        <span>Large captions (voice still optional)</span>
+      </label>
+      <label class="toggle">
+        <input type="checkbox" id="talkOwnMovesMore" checked />
+        <span>Talk more after my moves</span>
+      </label>
+      <label class="toggle">
+        <input type="checkbox" id="parentalLock" />
+        <span>Beginner lock (hide eval, hints, takebacks)</span>
+      </label>
+      <p class="fine opt">Optional — off unless you turn them on:</p>
+      <label class="toggle">
+        <input type="checkbox" id="studyPages" />
+        <span>Coach on analysis / study / broadcast pages</span>
+      </label>
+      <label class="toggle">
+        <input type="checkbox" id="clockSilence" />
+        <span>Stay quiet in bullet / low clock</span>
+      </label>
+      <label class="toggle">
+        <input type="checkbox" id="useNewTab" />
+        <span>Remind me to bookmark Today's page</span>
+      </label>
+      <p class="fine" id="newtab-hint" hidden>Pawnsy never hijacks your new tab. Bookmark <em>Today</em> if you want a dashboard.</p>
+      <details class="more nested">
+        <summary>Paste a finished PGN (optional)</summary>
+        <textarea id="pgn" rows="4" placeholder="1. e4 e5 …"></textarea>
+        <button type="button" class="open secondary" id="review-pgn">Review with voice</button>
+      </details>
+    </details>
+    <a class="open" id="open" href="#">Open Pawnsy</a>
+    <script type="module" src="popup.js"></script>
+  </body>
+</html>
