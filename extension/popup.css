@@ -54,3 +54,18 @@ header p {
   font-weight: 700;
   margin-bottom: 14px;
 }
+
+.toggle {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin: 8px 12px;
+  font-size: 0.9rem;
+}
+
+.fine {
+  margin: 0 12px 10px;
+  color: #d9ccb3;
+  font-size: 0.75rem;
+  line-height: 1.4;
+}

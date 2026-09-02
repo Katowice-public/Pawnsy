@@ -5,7 +5,7 @@ import { explainMove, explainHint, legalDests, needsPromotion } from "../lib/coa
 import { evaluateWhite } from "../lib/eval.js";
 import { openingName } from "../data/openings.js";
 import { think } from "./engine-client.js";
-import { addXp, awardBadge, touchStreak } from "../ui/storage.js";
+import { speakCoach } from "../lib/voice.js";
 
 const STRENGTHS = [
   { id: "beginner", label: "Beginner", blurb: "Plays like a fellow learner." },
@@ -106,8 +106,11 @@ export function renderPlay(root, ctx) {
     board.setInteractive(canUserMove());
   }
 
-  function say(text, extra) {
+  function say(text, extra, speak = true) {
     coachBox.innerHTML = pawnsySays(text, extra);
+    if (speak && ctx.progress.settings?.voice !== false && text !== "Let me think…") {
+      speakCoach([text, extra].filter(Boolean).join(" "));
+    }
   }
 
   function renderLog() {

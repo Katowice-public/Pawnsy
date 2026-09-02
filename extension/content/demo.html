@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Pawnsy site coach demo</title>
+    <link rel="stylesheet" href="overlay.css" />
+    <style>
+      body {
+        margin: 0;
+        font-family: "Segoe UI", system-ui, sans-serif;
+        background: #312e2b;
+        color: #eee;
+      }
+      main {
+        max-width: 720px;
+        margin: 0 auto;
+        padding: 24px 16px 120px;
+      }
+      h1 {
+        font-family: Palatino, Georgia, serif;
+      }
+      .hint {
+        color: #ccc;
+        max-width: 40rem;
+      }
+      .board {
+        width: min(480px, 100%);
+        aspect-ratio: 1;
+        display: grid;
+        grid-template-columns: repeat(8, 1fr);
+        border: 8px solid #1c1712;
+        position: relative;
+      }
+      .sq {
+        aspect-ratio: 1;
+      }
+      .sq.light {
+        background: #ead7b0;
+      }
+      .sq.dark {
+        background: #b06a3c;
+      }
+      .piece {
+        position: absolute;
+        width: 12.5%;
+        height: 12.5%;
+        display: grid;
+        place-items: center;
+        font-size: 1.8rem;
+        pointer-events: none;
+      }
+      .actions {
+        margin-top: 16px;
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+      button {
+        padding: 8px 12px;
+        border-radius: 999px;
+        border: 0;
+        cursor: pointer;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <p style="opacity: 0.7">Chess.com / Lichess coach demo</p>
+      <h1>Hear Pawnsy on a live-style board</h1>
+      <p class="hint">
+        This mock uses Chess.com piece classes so the same reader that runs on chess.com and lichess can watch it.
+        Press the moves in order. Pawnsy should speak after each one. No engine best-move overlay — that's the point.
+      </p>
+      <div class="board" id="board"></div>
+      <div class="actions">
+        <button type="button" id="e4">Play 1.e4</button>
+        <button type="button" id="e5">Play 1…e5</button>
+        <button type="button" id="nf3">Play 2.Nf3</button>
+        <button type="button" id="reset">Reset</button>
+      </div>
+    </main>
+    <script type="module" src="demo.js"></script>
+  </body>
+</html>

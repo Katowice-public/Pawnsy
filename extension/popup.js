@@ -1,4 +1,4 @@
-import { loadProgress, rankFor } from "./ui/storage.js";
+import { loadProgress, rankFor, saveProgress } from "./ui/storage.js";
 import { LESSONS } from "./data/lessons.js";
 import { dailyPuzzle } from "./data/puzzles.js";
 
@@ -29,3 +29,20 @@ document.getElementById("open").addEventListener("click", (event) => {
   event.preventDefault();
   openPage("#/");
 });
+
+const voice = document.getElementById("voice");
+const siteCoach = document.getElementById("siteCoach");
+voice.checked = progress.settings?.voice !== false;
+siteCoach.checked = progress.settings?.siteCoach !== false;
+
+async function persist() {
+  progress.settings = {
+    ...progress.settings,
+    voice: voice.checked,
+    siteCoach: siteCoach.checked,
+  };
+  await saveProgress(progress);
+}
+
+voice.addEventListener("change", persist);
+siteCoach.addEventListener("change", persist);

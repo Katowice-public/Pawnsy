@@ -31,7 +31,7 @@ export function defaultProgress() {
     openings: {},
     games: { played: 0, wins: 0, losses: 0, draws: 0 },
     badges: {},
-    settings: { strength: "club", color: "white" },
+    settings: { strength: "club", color: "white", voice: true, siteCoach: true },
   };
 }
 
@@ -72,7 +72,14 @@ async function rawSet(value) {
 
 export async function loadProgress() {
   const stored = await rawGet();
-  return { ...defaultProgress(), ...(stored || {}) };
+  const base = defaultProgress();
+  if (!stored) return base;
+  return {
+    ...base,
+    ...stored,
+    settings: { ...base.settings, ...(stored.settings || {}) },
+    puzzles: { ...base.puzzles, ...(stored.puzzles || {}) },
+  };
 }
 
 export async function saveProgress(progress) {

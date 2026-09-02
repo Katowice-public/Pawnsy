@@ -2,8 +2,8 @@
   "manifest_version": 3,
   "name": "Pawnsy",
   "short_name": "Pawnsy",
-  "version": "1.0.0",
-  "description": "Learn chess with a friendly coach: lessons, tactics, openings, and play vs Pawnsy.",
+  "version": "1.1.0",
+  "description": "Learn chess with a friendly coach: lessons, tactics, openings, play vs Pawnsy, and a spoken coach on Chess.com and Lichess.",
   "icons": {
     "16": "icons/icon-16.png",
     "32": "icons/icon-32.png",
@@ -22,5 +22,33 @@
   "background": {
     "service_worker": "background.js"
   },
-  "permissions": ["storage"]
+  "permissions": ["storage", "tts"],
+  "host_permissions": [
+    "https://www.chess.com/*",
+    "https://chess.com/*",
+    "https://lichess.org/*"
+  ],
+  "content_scripts": [
+    {
+      "matches": [
+        "https://www.chess.com/*",
+        "https://chess.com/*",
+        "https://lichess.org/*"
+      ],
+      "js": ["content/inject.js"],
+      "css": ["content/overlay.css"],
+      "type": "module",
+      "run_at": "document_idle"
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": ["vendor/*", "lib/*", "data/*", "ui/*", "content/*"],
+      "matches": [
+        "https://www.chess.com/*",
+        "https://chess.com/*",
+        "https://lichess.org/*"
+      ]
+    }
+  ]
 }
