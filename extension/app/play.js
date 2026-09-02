@@ -1,11 +1,18 @@
 import { Chess } from "../vendor/chess.js";
 import { Board, kingSquare } from "../ui/board.js";
 import { pawnsySays } from "../ui/mascot.js";
-import { explainMove, explainHint, legalDests, needsPromotion } from "../lib/coach.js";
+import { explainMove, explainHint, hangingPieces, legalDests, needsPromotion } from "../lib/coach.js";
 import { evaluateWhite } from "../lib/eval.js";
 import { openingName } from "../data/openings.js";
 import { think } from "./engine-client.js";
 import { speakCoach } from "../lib/voice.js";
+import { addXp, adaptPlayStrength, awardBadge, logPrivacy, touchStreak } from "../ui/storage.js";
+import { voiceOptions, withPersona } from "../lib/i18n.js";
+import { kingSafetySentence } from "../lib/king-safety.js";
+import { labelMoveQuality, swingForMover } from "../lib/human-eval.js";
+import { addJournalEntry, hangingNote } from "../lib/journal.js";
+import { copyText, shareText } from "../lib/share.js";
+import { pgnFromSans } from "../lib/review-game.js";
 
 const STRENGTHS = [
   { id: "beginner", label: "Beginner", blurb: "Plays like a fellow learner." },
@@ -15,11 +22,13 @@ const STRENGTHS = [
 
 export function renderPlay(root, ctx) {
   const settings = ctx.progress.settings || { strength: "club", color: "white" };
+  const lock = Boolean(settings.parentalLock);
   let userColor = settings.color || "white";
-  let strength = settings.strength || "club";
+  let strength = lock ? "beginner" : settings.strength || "club";
   let game = new Chess();
   let board;
   let thinking = false;
+  let lastLine = "";
   const log = [];
 
   root.innerHTML = `
@@ -27,14 +36,16 @@ export function renderPlay(root, ctx) {
       <div class="play-main">
         <div class="board-well" id="play-board"></div>
         <div class="play-toolbar">
-          <button type="button" class="btn ghost" data-act="back">Take back</button>
-          <button type="button" class="btn ghost" data-act="hint">Hint</button>
+          <button type="button" class="btn ghost" data-act="back" ${lock ? "hidden" : ""}>Take back</button>
+          <button type="button" class="btn ghost" data-act="hint" ${lock ? "hidden" : ""}>Hint</button>
           <button type="button" class="btn ghost" data-act="flip">Flip</button>
+          <button type="button" class="btn ghost" data-act="share">Share position</button>
+          <button type="button" class="btn ghost" data-act="review" hidden>Review this game</button>
           <button type="button" class="btn" data-act="new">New game</button>
         </div>
       </div>
       <aside class="play-side">
-        <div class="eval-shell" aria-hidden="true">
+        <div class="eval-shell" aria-hidden="true" ${lock ? "hidden" : ""}>
           <div class="eval-fill" id="eval-fill"></div>
         </div>
         <div class="panel">
@@ -45,7 +56,7 @@ export function renderPlay(root, ctx) {
               <option value="black">Black</option>
             </select>
           </label>
-          <label class="field">
+          <label class="field" ${lock ? "hidden" : ""}>
             <span>Pawnsy's strength</span>
             <select id="play-strength">
               ${STRENGTHS.map((s) => `<option value="${s.id}">${s.label}</option>`).join("")}
@@ -106,11 +117,35 @@ export function renderPlay(root, ctx) {
     board.setInteractive(canUserMove());
   }
 
-  function say(text, extra, speak = true) {
+  function say(text, extra, speak = true, extraOpts = {}) {
+    lastLine = [text, extra].filter(Boolean).join(" ");
     coachBox.innerHTML = pawnsySays(text, extra);
     if (speak && ctx.progress.settings?.voice !== false && text !== "Let me think…") {
-      speakCoach([text, extra].filter(Boolean).join(" "));
+      const spoken = withPersona(lastLine, ctx.progress.settings, extraOpts);
+      speakCoach(spoken, voiceOptions(ctx.progress.settings));
     }
+  }
+
+  function commentOn(before, played) {
+    const title = openingName(game.history());
+    const exp = explainMove(before, played, game, title);
+    const safety = kingSafetySentence(game);
+    const prior = new Chess(before);
+    const quality = labelMoveQuality(swingForMover(prior, game, played.color));
+    const hung = hangingPieces(game, played.color);
+    if (hung.length) {
+      addJournalEntry(ctx.progress, {
+        fen: game.fen(),
+        theme: "hanging",
+        san: played.san,
+        note: hangingNote(hung[0].piece.type, hung[0].sq),
+      });
+      ctx.save();
+    }
+    return {
+      summary: exp.summary,
+      text: [exp.text, safety, quality].filter(Boolean).join(" "),
+    };
   }
 
   function renderLog() {
@@ -126,8 +161,7 @@ export function renderPlay(root, ctx) {
       say("That isn't legal from here. If a square has a dot, the piece can go there.");
       return;
     }
-    const title = openingName(game.history());
-    const exp = explainMove(before, played, game, title);
+    const exp = commentOn(before, played);
     log.push({ san: played.san, note: exp.summary });
     renderLog();
     syncBoard(played);
@@ -136,7 +170,7 @@ export function renderPlay(root, ctx) {
       finishGame();
       return;
     }
-    say(exp.text);
+    say(exp.text, "", true, { ownMove: true });
     window.setTimeout(reply, 180);
   }
 
@@ -157,8 +191,7 @@ export function renderPlay(root, ctx) {
       syncBoard();
       return;
     }
-    const title = openingName(game.history());
-    const exp = explainMove(before, played, game, title);
+    const exp = commentOn(before, played);
     log.push({ san: played.san, note: move.book ? `Book move. ${exp.summary}` : exp.summary });
     renderLog();
     syncBoard(played);
@@ -166,7 +199,9 @@ export function renderPlay(root, ctx) {
       finishGame();
       return;
     }
-    say(move.book ? `I'll stay in a known opening. ${exp.text}` : exp.text);
+    const talkMore = ctx.progress.settings?.talkOwnMovesMore !== false;
+    const line = move.book ? `I'll stay in a known opening. ${exp.text}` : exp.text;
+    say(talkMore ? exp.summary : line, talkMore ? "" : "", true, { ownMove: false });
   }
 
   function finishGame() {
@@ -174,6 +209,7 @@ export function renderPlay(root, ctx) {
     touchStreak(ctx.progress);
     ctx.progress.games.played += 1;
     let line = "Game over.";
+    let result = "draw";
     if (game.isCheckmate()) {
       const winner = game.turn() === "b" ? "white" : "black";
       if (winner === userColor) {
@@ -181,17 +217,31 @@ export function renderPlay(root, ctx) {
         addXp(ctx.progress, 20);
         awardBadge(ctx.progress, "first-win");
         line = "Checkmate. You win! That was clean.";
+        result = "win";
       } else {
         ctx.progress.games.losses += 1;
-        line = "Checkmate. I got there first — take back a few moves and try another idea.";
+        line = lock
+          ? "Checkmate. Try another game — same ideas, slower if you like."
+          : "Checkmate. I got there first — take back a few moves and try another idea.";
+        result = "loss";
       }
     } else {
       ctx.progress.games.draws += 1;
       if (game.isStalemate()) line = "Stalemate. That's a draw — the king is safe but has no legal move.";
       else line = "Draw. Sometimes the honest result is a handshake.";
     }
+    if (!lock) {
+      const next = adaptPlayStrength(ctx.progress, result);
+      strength = next;
+      strengthSel.value = next;
+      blurb.textContent = `${STRENGTHS.find((s) => s.id === next).blurb} Strength shifts after win/loss streaks.`;
+    }
+    ctx.progress.pendingPgn = pgnFromSans(game.history());
+    logPrivacy(ctx.progress, "play_finish");
     ctx.save();
-    say(line, "Start a new game whenever you're ready.");
+    const reviewBtn = root.querySelector("[data-act=review]");
+    if (reviewBtn) reviewBtn.hidden = false;
+    say(line, "Start a new game whenever you're ready — or review the PGN.");
   }
 
   function newGame() {
@@ -200,6 +250,8 @@ export function renderPlay(root, ctx) {
     renderLog();
     board.setOrientation(userColor);
     syncBoard();
+    const reviewBtn = root.querySelector("[data-act=review]");
+    if (reviewBtn) reviewBtn.hidden = true;
     say(
       userColor === "white"
         ? "You have White. Center, develop, castle — I'll play along and talk you through it."
@@ -212,8 +264,17 @@ export function renderPlay(root, ctx) {
   root.querySelector("[data-act=flip]").addEventListener("click", () => {
     board.setOrientation(board.orientation === "white" ? "black" : "white");
   });
+  root.querySelector("[data-act=share]").addEventListener("click", async () => {
+    const ok = await copyText(shareText(game.fen(), lastLine));
+    say(ok ? "Copied the position and my last sentence." : shareText(game.fen(), lastLine), "", false);
+  });
+  root.querySelector("[data-act=review]").addEventListener("click", () => {
+    ctx.progress.pendingPgn = pgnFromSans(game.history());
+    ctx.save();
+    location.hash = "#/review";
+  });
   root.querySelector("[data-act=back]").addEventListener("click", () => {
-    if (thinking) return;
+    if (thinking || lock) return;
     game.undo();
     if (game.history().length && !canUserMove()) game.undo();
     log.splice(game.history().length);
@@ -222,7 +283,7 @@ export function renderPlay(root, ctx) {
     say("Let's try that position again.");
   });
   root.querySelector("[data-act=hint]").addEventListener("click", async () => {
-    if (!canUserMove()) return;
+    if (!canUserMove() || lock) return;
     say("Looking for a constructive idea…");
     const move = await think(game.fen(), "coach", game.history());
     if (!move) return;

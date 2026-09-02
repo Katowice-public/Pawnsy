@@ -3,7 +3,8 @@ import { Board, kingSquare } from "../ui/board.js";
 import { pawnsySays } from "../ui/mascot.js";
 import { legalDests, needsPromotion } from "../lib/coach.js";
 import { OPENINGS } from "../data/openings.js";
-import { addXp, awardBadge, touchStreak } from "../ui/storage.js";
+import { addXp, awardBadge, toggleRepertoire, touchStreak } from "../ui/storage.js";
+import { noteDailyThree } from "../lib/daily.js";
 
 export function renderOpenings(root, ctx, id) {
   if (id) {
@@ -16,25 +17,58 @@ export function renderOpenings(root, ctx, id) {
     return;
   }
 
+  const stars = new Set(ctx.progress.repertoire || []);
   root.innerHTML = `
     <section class="page">
       <header class="page-head">
         <p class="eyebrow">Opening lab</p>
         <h1>Play the book moves</h1>
-        <p>You take the side that owns the idea. Pawnsy plays the other half of the line and explains each ply.</p>
+        <p>You take the side that owns the idea. Pawnsy plays the other half of the line and explains each ply. Star a line to build a personal repertoire.</p>
       </header>
-      <div class="card-grid">
-        ${OPENINGS.map((o) => {
-          const done = Boolean(ctx.progress.openings[o.id]);
-          return `<a class="card ${done ? "is-done" : ""}" href="#/openings/${o.id}">
+      <div class="chip-row">
+        <button type="button" class="chip is-on" data-rep="all">All</button>
+        <button type="button" class="chip" data-rep="star">Starred</button>
+      </div>
+      <div class="card-grid" id="op-grid"></div>
+    </section>
+  `;
+
+  const grid = root.querySelector("#op-grid");
+  const paint = (mode) => {
+    const list = mode === "star" ? OPENINGS.filter((o) => stars.has(o.id)) : OPENINGS;
+    grid.innerHTML = (list.length ? list : OPENINGS)
+      .map((o) => {
+        const done = Boolean(ctx.progress.openings[o.id]);
+        const starred = stars.has(o.id);
+        return `<div class="card static ${done ? "is-done" : ""}">
             <span class="card-kicker">${o.eco}${done ? " · drilled" : ""}</span>
             <strong>${o.name}</strong>
             <span>${o.summary}</span>
-          </a>`;
-        }).join("")}
-      </div>
-    </section>
-  `;
+            <div class="lesson-actions">
+              <a class="btn" href="#/openings/${o.id}">Drill</a>
+              <button type="button" class="btn ghost" data-star="${o.id}">${starred ? "Starred" : "Star"}</button>
+            </div>
+          </div>`;
+      })
+      .join("");
+  };
+  paint("all");
+  root.addEventListener("click", (event) => {
+    const star = event.target.closest("[data-star]");
+    if (star) {
+      toggleRepertoire(ctx.progress, star.dataset.star);
+      ctx.save();
+      if (stars.has(star.dataset.star)) stars.delete(star.dataset.star);
+      else stars.add(star.dataset.star);
+      const mode = root.querySelector("[data-rep].is-on")?.dataset.rep || "all";
+      paint(mode);
+      return;
+    }
+    const chip = event.target.closest("[data-rep]");
+    if (!chip) return;
+    for (const el of root.querySelectorAll("[data-rep]")) el.classList.toggle("is-on", el === chip);
+    paint(chip.dataset.rep);
+  });
 }
 
 function renderDrill(root, ctx, opening) {
@@ -126,6 +160,7 @@ function renderDrill(root, ctx, opening) {
       addXp(ctx.progress, 12);
     }
     if (Object.keys(ctx.progress.openings).length >= 3) awardBadge(ctx.progress, "openings-3");
+    noteDailyThree(ctx.progress, "opening", opening.id);
     ctx.save();
     speech.innerHTML = pawnsySays(
       "That's the skeleton of the opening. Play it vs me in a full game and notice when the ideas still apply after the book ends.",

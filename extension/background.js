@@ -5,7 +5,13 @@ chrome.runtime.onInstalled.addListener((details) => {
 });
 
 chrome.runtime.onMessage.addListener((message) => {
-  if (!message || !chrome.tts) return;
+  if (!message) return;
+  if (message.type === "pawnsy-open") {
+    const hash = message.hash || "#/";
+    chrome.tabs.create({ url: chrome.runtime.getURL(`app/index.html${hash}`) });
+    return;
+  }
+  if (!chrome.tts) return;
   if (message.type === "pawnsy-stop-speak") {
     chrome.tts.stop();
     return;
@@ -13,9 +19,9 @@ chrome.runtime.onMessage.addListener((message) => {
   if (message.type === "pawnsy-speak" && message.text) {
     chrome.tts.stop();
     chrome.tts.speak(message.text, {
-      rate: 1.05,
+      rate: Number(message.rate) || 1.05,
       enqueue: false,
-      lang: "en-US",
+      lang: message.lang || "en-US",
     });
   }
 });

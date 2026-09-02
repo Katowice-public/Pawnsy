@@ -26,18 +26,20 @@ export function forVoice(text) {
     .trim();
 }
 
-export function speakCoach(text) {
+export function speakCoach(text, options = {}) {
   const spoken = forVoice(text).slice(0, 420);
   if (!spoken) return;
+  const lang = options.lang || "en-US";
+  const rate = options.rate || 1.05;
   if (globalThis.chrome?.runtime?.sendMessage) {
     try {
-      chrome.runtime.sendMessage({ type: "pawnsy-speak", text: spoken });
+      chrome.runtime.sendMessage({ type: "pawnsy-speak", text: spoken, lang, rate });
       return;
     } catch {
       /* fall through to page speech */
     }
   }
-  speakLocal(spoken);
+  speakLocal(spoken, { lang, rate });
 }
 
 export function stopSpeaking() {
@@ -51,14 +53,19 @@ export function stopSpeaking() {
   if (globalThis.speechSynthesis) speechSynthesis.cancel();
 }
 
-export function speakLocal(text) {
+export function speakLocal(text, options = {}) {
   if (!globalThis.speechSynthesis) return;
   speechSynthesis.cancel();
   const utter = new SpeechSynthesisUtterance(text);
-  utter.rate = 1.02;
+  const lang = options.lang || "en-US";
+  utter.lang = lang;
+  utter.rate = options.rate || 1.02;
   utter.pitch = 1.04;
+  const prefix = lang.slice(0, 2);
   const voices = speechSynthesis.getVoices();
   const pick =
+    voices.find((v) => v.lang?.toLowerCase().startsWith(lang.toLowerCase())) ||
+    voices.find((v) => v.lang?.toLowerCase().startsWith(prefix)) ||
     voices.find((v) => /en[-_]?US/i.test(v.lang) && /natural|google|samantha|female/i.test(v.name)) ||
     voices.find((v) => /^en/i.test(v.lang));
   if (pick) utter.voice = pick;

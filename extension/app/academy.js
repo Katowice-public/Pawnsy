@@ -4,6 +4,7 @@ import { pawnsySays } from "../ui/mascot.js";
 import { legalDests, needsPromotion } from "../lib/coach.js";
 import { LESSONS, lessonById, chapterGroups } from "../data/lessons.js";
 import { addXp, awardBadge, touchStreak } from "../ui/storage.js";
+import { noteDailyThree } from "../lib/daily.js";
 
 export function renderAcademy(root, ctx) {
   const groups = chapterGroups();
@@ -12,7 +13,7 @@ export function renderAcademy(root, ctx) {
       <header class="page-head">
         <p class="eyebrow">Academy</p>
         <h1>Learn the game in small scenes</h1>
-        <p>Each lesson is a few minutes on one idea. Play the moves on the board — reading alone will not stick.</p>
+        <p>Each lesson is a few minutes on one idea. Play the moves on the board — reading alone will not stick. The whole Academy pack lives in the extension, so it still works offline after you load it.</p>
       </header>
       ${groups
         .map(
@@ -164,6 +165,7 @@ export function renderLesson(root, ctx, id) {
       if (LESSONS.every((item) => ctx.progress.completedLessons[item.id])) {
         awardBadge(ctx.progress, "academy-done");
       }
+      noteDailyThree(ctx.progress, "lesson", lesson.id);
       ctx.save();
       finished = true;
       speech.innerHTML = pawnsySays("Lesson complete. A little every day beats a cram before a tournament.");

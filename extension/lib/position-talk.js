@@ -1,5 +1,6 @@
 import { hangingPieces } from "./coach.js";
 import { Chess } from "../vendor/chess.js";
+import { kingSafetyTalk } from "./king-safety.js";
 
 export function explainPosition(fen) {
   const chess = new Chess(fen);
@@ -15,7 +16,9 @@ export function explainPosition(fen) {
   if (theirs.length) {
     bits.push(`Their ${name(theirs[0].piece.type)} on ${theirs[0].sq} is loose.`);
   }
-  if (!ours.length && !theirs.length && !chess.inCheck()) {
+  const safety = kingSafetyTalk(chess);
+  bits.push(...safety.slice(0, 2));
+  if (!ours.length && !theirs.length && !chess.inCheck() && !safety.length) {
     bits.push("No obvious hanging pieces. Look at the center, then at king safety.");
   }
   return bits.join(" ");

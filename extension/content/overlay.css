@@ -15,7 +15,8 @@
 
 #pawnsy-root.is-min .pawnsy-status,
 #pawnsy-root.is-min .pawnsy-line,
-#pawnsy-root.is-min .pawnsy-actions {
+#pawnsy-root.is-min .pawnsy-actions,
+#pawnsy-root.is-min .pawnsy-fairplay {
   display: none;
 }
 
@@ -58,8 +59,28 @@
   margin: 0 0 8px;
 }
 
+.pawnsy-fairplay {
+  margin: 0 0 8px;
+  padding: 6px 8px;
+  border-radius: 8px;
+  border: 1px dashed rgba(212, 168, 75, 0.4);
+  color: #d9ccb3;
+  font-size: 0.72rem;
+  line-height: 1.35;
+}
+
 .pawnsy-line {
   color: #f0d48a;
+}
+
+#pawnsy-root.captions-on .pawnsy-line {
+  font-size: 1.12rem;
+  line-height: 1.4;
+  font-weight: 600;
+}
+
+#pawnsy-root.is-lost {
+  border-color: #c45c48;
 }
 
 .pawnsy-actions {
@@ -71,4 +92,25 @@
 .pawnsy-actions button {
   padding: 6px 10px;
   font-size: 0.82rem;
+}
+
+#pawnsy-root [hidden] {
+  display: none !important;
+}
+
+@media (max-width: 720px) {
+  #pawnsy-root {
+    right: 8px;
+    left: 8px;
+    bottom: max(8px, env(safe-area-inset-bottom));
+    width: auto;
+    font-size: 16px;
+  }
+
+  .pawnsy-icon,
+  .pawnsy-actions button {
+    min-height: 44px;
+    min-width: 44px;
+    padding: 8px 12px;
+  }
 }

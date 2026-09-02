@@ -4,6 +4,8 @@ import { pawnsySays } from "../ui/mascot.js";
 import { legalDests, needsPromotion } from "../lib/coach.js";
 import { THEMES, activePuzzles, dailyPuzzle, puzzleById, puzzlesByTheme } from "../data/puzzles.js";
 import { addXp, awardBadge, touchStreak } from "../ui/storage.js";
+import { journalThemes } from "../lib/journal.js";
+import { noteDailyThree } from "../lib/daily.js";
 
 export function renderTactics(root, ctx, id) {
   if (id === "daily") {
@@ -35,14 +37,22 @@ export function renderTactics(root, ctx, id) {
       </a>
       <div class="chip-row" id="theme-row">
         ${THEMES.map((t) => `<button type="button" class="chip" data-theme="${t.id}">${t.label}</button>`).join("")}
+        ${ctx.progress.journal?.length ? `<button type="button" class="chip" data-theme="misses">Your misses</button>` : ""}
       </div>
       <div class="card-grid" id="puzzle-grid"></div>
     </section>
   `;
 
   const grid = root.querySelector("#puzzle-grid");
+  const missThemes = new Set(journalThemes(ctx.progress.journal).map((t) => t.id));
   const paint = (theme) => {
-    const list = puzzlesByTheme(theme);
+    let list = puzzlesByTheme(theme === "misses" ? "all" : theme);
+    if (theme === "misses") {
+      list = list.filter((p) => missThemes.has(p.theme));
+      if (!list.length) list = puzzlesByTheme("hanging");
+    } else if (theme === "all" && missThemes.size) {
+      list = [...list].sort((a, b) => Number(missThemes.has(b.theme)) - Number(missThemes.has(a.theme)));
+    }
     grid.innerHTML = list
       .map((p) => {
         const done = Boolean(solved[p.id]);
@@ -151,6 +161,7 @@ function renderPuzzle(root, ctx, puzzle) {
       awardBadge(ctx.progress, "first-puzzle");
       if (ctx.progress.puzzles.solved >= 10) awardBadge(ctx.progress, "puzzles-10");
     }
+    noteDailyThree(ctx.progress, "puzzle", puzzle.id);
     ctx.save();
     speech.innerHTML = pawnsySays(won ? puzzle.explain : "Have another look.", won ? "The pattern will show up in your games." : "");
   }

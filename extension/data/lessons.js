@@ -371,6 +371,140 @@ export const LESSONS = [
       },
     ],
   },
+  {
+    id: "opposition",
+    chapter: "Endgames",
+    title: "Opposition",
+    minutes: 6,
+    blurb: "Kings face each other with one square between. The side that does not have to step aside often shepherds a pawn home.",
+    steps: [
+      {
+        fen: "8/8/4k3/8/8/4K3/8/8 w - - 0 1",
+        text: "Kings are in opposition when they face each other with one square in between. Here White can take the opposition by stepping to e4 — then Black will have to give way.",
+        highlights: ["e3", "e4", "e6"],
+      },
+      {
+        fen: "8/8/4k3/8/8/4K3/8/8 w - - 0 1",
+        text: "Take the opposition. Play Ke4.",
+        extra: "Whoever must move their king aside loses the 'face-off' and lets the other king advance.",
+        task: { type: "move", from: "e3", to: "e4", success: "That's opposition. Black's king must now step left or right, and White can shoulder in." },
+      },
+      {
+        fen: "8/8/4k3/8/4K3/8/8/8 b - - 0 1",
+        text: "Now White already has the opposition and it is Black to move. Black must step aside. You will use this picture every time a king and pawn race to promotion.",
+        highlights: ["e4", "e5", "e6"],
+      },
+    ],
+  },
+  {
+    id: "lucena",
+    chapter: "Endgames",
+    title: "Lucena — building a bridge",
+    minutes: 7,
+    blurb: "The winning rook-and-pawn method: park the king, check the enemy away, then hide behind a rook 'bridge'.",
+    steps: [
+      {
+        fen: "1K6/1P6/2k5/8/8/8/8/R7 w - - 0 1",
+        text: "Lucena-style: White's pawn is one step from promoting, but the Black king shoulders the White king. The recipe is a bridge — the rook checks, then steps to the fourth rank so the king can come out.",
+        highlights: ["b8", "b7", "c6", "a1"],
+      },
+      {
+        fen: "1K6/1P6/2k5/8/8/8/8/R7 w - - 0 1",
+        text: "First, check the Black king away from the pawn. Play Ra6+.",
+        extra: "After the king steps back, the rook can swing to a fourth-rank square (the 'bridge') so checks from behind no longer matter.",
+        task: { type: "move", from: "a1", to: "a6", success: "The king is driven off. Next you would build the bridge — rook to the fourth rank — then walk the king out and promote." },
+      },
+      {
+        fen: "1K6/1P6/8/1k6/8/R7/8/8 w - - 0 1",
+        text: "The rook on a3 is ready to become the shield. In a real Lucena you drop it to the fourth rank so when the king comes out, a check from behind is blocked. Remember the picture: pawn on 7th, rook builds a bridge, king escapes, pawn queens.",
+        highlights: ["a3", "b7", "b8"],
+      },
+    ],
+  },
+  {
+    id: "philidor",
+    chapter: "Endgames",
+    title: "Philidor — the drawing rook",
+    minutes: 6,
+    blurb: "King on the sixth rank, rook on the third. Keep the enemy king in front of its pawn and you hold the draw.",
+    steps: [
+      {
+        fen: "8/8/4k3/4p3/8/8/4R3/4K3 b - - 0 1",
+        text: "Philidor idea: the defending rook sits on the third rank (here e2, looking at the sixth from Black's view it's the other way). The drawing plan is to keep the attacking king from crossing the sixth rank until the pawn arrives — then check from behind.",
+        highlights: ["e2", "e6", "e5"],
+      },
+      {
+        fen: "8/8/4k3/4p3/8/8/4R3/4K3 w - - 0 1",
+        text: "White is the defender. Keep the rook on the third rank for now. A useful waiting idea is Re3, still cutting the king off.",
+        extra: "When the pawn reaches the sixth, abandon the rank and check the king from the rear — it cannot hide.",
+        task: { type: "move", from: "e2", to: "e3", success: "That's the Philidor cut. The Black king cannot cross e3. Wait until the pawn comes closer, then check from behind." },
+      },
+      {
+        fen: "8/8/4k3/4p3/8/4R3/8/4K3 w - - 0 1",
+        text: "Hold this picture: rook on the third, king in front of the pawn. It is one of the few endgames every tournament player should be able to draw in their sleep.",
+        highlights: ["e3", "e5", "e6"],
+      },
+    ],
+  },
+  {
+    id: "legal-trap",
+    chapter: "Traps",
+    title: "Legal's mate",
+    minutes: 5,
+    blurb: "A famous queen sacrifice that mates with two knights and a bishop. Don't grab the queen.",
+    steps: [
+      {
+        fen: "rnbqkbnr/ppp2ppp/3p4/4p3/4P3/5N2/PPPP1PPP/RNBQKB1R w KQkq - 0 3",
+        text: "After 1.e4 e5 2.Nf3 d6, White often develops Bc4. If Black pins with ...Bg4 too casually, Legal's trap appears: knights jump, the queen is 'hanging', and mate follows on f7.",
+        highlights: ["f3", "d6", "e4", "e5"],
+      },
+      {
+        fen: "rn1qkbnr/ppp2ppp/3p4/4N3/2B1P1b1/8/PPPP1PPP/RNBQK2R b KQkq - 0 4",
+        text: "White has just taken on e5. The bishop on g4 'wins' the queen on d1 — but taking it is suicide. You are Black. Do not take the queen. Play dxe5 instead, the honest recapture.",
+        extra: "If 4...Bxd1?? White mates with Bxf7+ Ke7 Nd5#.",
+        task: { type: "move", from: "d6", to: "e5", success: "That's the antidote. You took the knight, not the bait queen." },
+      },
+    ],
+  },
+  {
+    id: "fishing-pole",
+    chapter: "Traps",
+    title: "The fishing pole",
+    minutes: 5,
+    blurb: "A rook-file trap: the knight on g4 looks loose, then h5 supports it and the h-file opens onto an uncastled or castled king.",
+    steps: [
+      {
+        fen: "r1bqkb1r/pppp1ppp/2n2n2/1B2p3/4P3/5N2/PPPP1PPP/RNBQK2R w KQkq - 4 4",
+        text: "From a Ruy Lopez, Black can play ...Ng4 later and support it with ...h5. The knight looks hanging. If White grabs it, the h-file opens against the king.",
+        highlights: ["f6", "b5", "e5"],
+      },
+      {
+        fen: "r1bqkb1r/pppp1pp1/2n5/1B2p2p/4P1n1/5N2/PPPP1PPP/RNBQ1RK1 w kq - 0 7",
+        text: "Black's knight on g4 is the bait, h5 the pole. White should not take on g4. Develop instead — a calm idea is h3, asking the knight to prove it. You are White. Play h3.",
+        extra: "If hxg4 hxg4, the rook on h8 suddenly stares at h2.",
+        task: { type: "move", from: "h2", to: "h3", success: "You asked the question. Traps work on greed — decline the gift and keep developing." },
+      },
+    ],
+  },
+  {
+    id: "elephant-trap",
+    chapter: "Traps",
+    title: "The elephant trap",
+    minutes: 5,
+    blurb: "Queen's Gambit Declined: White thinks they win a pawn with Qa4+; Black's bishop recapture wins a piece.",
+    steps: [
+      {
+        fen: "rnbqk1nr/ppp2ppp/4p3/3p4/1bPP4/2N5/PP2PPPP/R1BQKBNR w KQkq - 2 4",
+        text: "QGD with ...Bb4. A greedy try is 4.Qa4+ to 'win' the bishop after cxd5. That is the elephant trap: Black recaptures on d5 with the pawn, then ...Bd7 hits the queen and the knight on c3 is pinned.",
+        highlights: ["b4", "c3", "d5"],
+      },
+      {
+        fen: "rnbqk1nr/ppp2ppp/4p3/3P4/1b1P4/2N5/PP2PPPP/R1BQKBNR b KQkq - 0 4",
+        text: "White has taken on d5. Recapture with the pawn — not the queen — so the bishop on b4 still pins the knight.",
+        task: { type: "move", from: "e6", to: "d5", success: "Now ...Bd7 will harass a queen if it came to a4, and the pinned knight cannot recapture safely." },
+      },
+    ],
+  },
 ];
 
 export function lessonById(id) {
