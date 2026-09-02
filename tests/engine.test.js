@@ -18,6 +18,14 @@ test("engine finds back-rank mate in one", () => {
   assert.equal(move.san.replace(/[+#]/g, ""), "Ra8");
 });
 
+test("engine uses the opening book when history is provided", () => {
+  const chess = new Chess();
+  chess.move("e4");
+  const move = pickMove(chess.fen(), "club", chess.history());
+  assert.equal(move.book, true);
+  assert.ok(["e5", "c5", "e6", "c6", "d5"].includes(move.san.replace(/[+#]/g, "")), move.san);
+});
+
 test("engine takes a hanging queen", () => {
   const fen = "4k3/8/8/8/8/2q5/8/2Q1K3 w - - 0 1";
   const move = pickMove(fen, "club");

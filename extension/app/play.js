@@ -141,7 +141,7 @@ export function renderPlay(root, ctx) {
     thinking = true;
     syncBoard(game.history({ verbose: true }).at(-1));
     say("Let me think…");
-    const move = await think(game.fen(), strength);
+    const move = await think(game.fen(), strength, game.history());
     thinking = false;
     if (!move) {
       finishGame();
@@ -221,7 +221,7 @@ export function renderPlay(root, ctx) {
   root.querySelector("[data-act=hint]").addEventListener("click", async () => {
     if (!canUserMove()) return;
     say("Looking for a constructive idea…");
-    const move = await think(game.fen(), "coach");
+    const move = await think(game.fen(), "coach", game.history());
     if (!move) return;
     board.setArrows([[move.from, move.to]]);
     say(explainHint(game.fen(), move));

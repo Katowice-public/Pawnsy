@@ -93,13 +93,13 @@ function pickRandom(chess) {
   return pool[Math.floor(Math.random() * pool.length)];
 }
 
-export function pickMove(fen, level = "club") {
+export function pickMove(fen, level = "club", history = []) {
   const chess = new Chess(fen);
   if (chess.isGameOver()) return null;
 
   const cfg = LEVELS[level] || LEVELS.club;
   if (cfg.useBook) {
-    const reply = bookReply(chess.history());
+    const reply = bookReply(history);
     if (reply && chess.moves().some((san) => san.replace(/[+#]/g, "") === reply.replace(/[+#]/g, ""))) {
       const played = chess.move(reply);
       if (played) {

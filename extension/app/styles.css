@@ -419,8 +419,7 @@ h1 {
   z-index: 4;
 }
 
-.promo-pop[hidden],
-.hidden {
+[hidden] {
   display: none !important;
 }
 
